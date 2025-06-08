@@ -115,36 +115,11 @@ fun ShopScreen(navController: NavController, viewModel: GameViewModel) {
     }
 }
 
-
 @Composable
 fun EmojiShopGrid(viewModel: GameViewModel) {
     val context = LocalContext.current
     val coins by viewModel.coins
     val selectedTheme by viewModel.selectedThemeName
-
-    var itemToBuy by remember { mutableStateOf<String?>(null) }
-    var itemPrice by remember { mutableIntStateOf(0) }
-
-    if (itemToBuy != null) {
-        AlertDialog(
-            onDismissRequest = { itemToBuy = null },
-            confirmButton = {
-                Button(onClick = {
-                    viewModel.availableThemes.find { it.name == itemToBuy }?.let { theme ->
-                        theme.unlocked = true
-                        viewModel.coins.value -= itemPrice
-                        Toast.makeText(context, "🎉 Compraste $itemToBuy", Toast.LENGTH_SHORT).show()
-                    }
-                    itemToBuy = null
-                }) { Text("Comprar") }
-            },
-            dismissButton = {
-                TextButton(onClick = { itemToBuy = null }) { Text("Cancelar") }
-            },
-            title = { Text("Confirmar compra") },
-            text = { Text("¿Comprar $itemToBuy por $itemPrice monedas?") }
-        )
-    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -171,8 +146,13 @@ fun EmojiShopGrid(viewModel: GameViewModel) {
                     if (!theme.unlocked) {
                         Button(
                             onClick = {
-                                itemToBuy = theme.name
-                                itemPrice = theme.price
+                                if (coins >= theme.price) {
+                                    theme.unlocked = true
+                                    viewModel.coins.intValue -= theme.price
+                                    viewModel.saveProgress()
+                                    viewModel.reloadAppData()
+                                    Toast.makeText(context, "🎉 Compraste ${theme.name}", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             enabled = coins >= theme.price
                         ) {
@@ -196,37 +176,12 @@ fun EmojiShopGrid(viewModel: GameViewModel) {
     }
 }
 
-
 @Composable
 fun CardStyleShopGrid(viewModel: GameViewModel) {
     val context = LocalContext.current
     val coins by viewModel.coins
     val selectedStyle by viewModel.selectedCardStyle
     val styles = viewModel.cardStyles
-
-    var itemToBuy by remember { mutableStateOf<String?>(null) }
-    var itemPrice by remember { mutableIntStateOf(0) }
-
-    if (itemToBuy != null) {
-        AlertDialog(
-            onDismissRequest = { itemToBuy = null },
-            confirmButton = {
-                Button(onClick = {
-                    styles.find { it.name == itemToBuy }?.let { style ->
-                        style.unlocked = true
-                        viewModel.coins.value -= itemPrice
-                        Toast.makeText(context, "🎉 Compraste $itemToBuy", Toast.LENGTH_SHORT).show()
-                    }
-                    itemToBuy = null
-                }) { Text("Comprar") }
-            },
-            dismissButton = {
-                TextButton(onClick = { itemToBuy = null }) { Text("Cancelar") }
-            },
-            title = { Text("Confirmar compra") },
-            text = { Text("¿Comprar $itemToBuy por $itemPrice monedas?") }
-        )
-    }
 
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -253,8 +208,13 @@ fun CardStyleShopGrid(viewModel: GameViewModel) {
                     if (!style.unlocked) {
                         Button(
                             onClick = {
-                                itemToBuy = style.name
-                                itemPrice = style.price
+                                if (coins >= style.price) {
+                                    style.unlocked = true
+                                    viewModel.coins.intValue -= style.price
+                                    viewModel.saveProgress()
+                                    viewModel.reloadAppData()
+                                    Toast.makeText(context, "🎉 Compraste ${style.name}", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             enabled = coins >= style.price
                         ) {
@@ -265,7 +225,8 @@ fun CardStyleShopGrid(viewModel: GameViewModel) {
                             onClick = {
                                 viewModel.setSelectedCardStyle(style.name)
                                 viewModel.saveProgress()
-                                viewModel.reloadAppData() },
+                                viewModel.reloadAppData()
+                            },
                             enabled = !isSelected
                         ) {
                             Text(if (isSelected) "En uso ✅" else "Usar estilo")
@@ -276,6 +237,7 @@ fun CardStyleShopGrid(viewModel: GameViewModel) {
         }
     }
 }
+
 
 
 @Composable

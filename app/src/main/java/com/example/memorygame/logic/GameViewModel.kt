@@ -116,11 +116,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             repository.appDataFlow.collect { data ->
                 _appData.value = data
-                coins.intValue = 300
+                coins.intValue = data.coins
                 unlockedBackgrounds.clear()
                 unlockedBackgrounds.addAll(data.unlockedBackgrounds)
                 unlockedMusics.clear()
                 unlockedMusics.addAll(data.unlockedMusics)
+                availableThemes.forEach { theme ->
+                    theme.unlocked = data.unlockedThemes.contains(theme.name)
+                }
+                cardStyles.forEach { style ->
+                    style.unlocked = data.unlockedCardStyles.contains(style.name)
+                }
 
 
 
